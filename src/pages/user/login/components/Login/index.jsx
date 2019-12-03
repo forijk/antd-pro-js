@@ -28,14 +28,6 @@ class Login extends Component {
     };
   }
 
-  componentDidMount() {
-    const { form, onCreate } = this.props;
-
-    if (onCreate) {
-      onCreate(form);
-    }
-  }
-
   onSwitch = type => {
     this.setState(
       {

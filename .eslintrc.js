@@ -5,7 +5,8 @@ module.exports = {
     page: true,
   },
   rules: {
-    'max-len': ['error', { code: 300 }],
+    // 'max-len': ['error', { code: 300 }],
+    'max-len': 0,
     'no-nested-ternary': 0,
     'no-console': 0,
   },

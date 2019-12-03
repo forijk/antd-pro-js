@@ -8,9 +8,9 @@ import styles from './style.less';
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginComponents;
 
-@connect(({ login, loading }) => ({
-  userLogin: login,
-  submitting: loading.effects['login/login'],
+@connect(({ userAndlogin, loading }) => ({
+  userAndlogin,
+  submitting: loading.effects['userAndlogin/login'],
 }))
 class Login extends Component {
   loginForm = undefined;
@@ -32,7 +32,7 @@ class Login extends Component {
     if (!err) {
       const { dispatch } = this.props;
       dispatch({
-        type: 'login/login',
+        type: 'userAndlogin/login',
         payload: { ...values, type },
       });
     }
@@ -50,21 +50,17 @@ class Login extends Component {
         return;
       }
 
-      this.loginForm.validateFields(['mobile'], {}, async (err, values) => {
+      this.loginForm.validateFields(['mobile'], {}, (err, values) => {
         if (err) {
           reject(err);
         } else {
           const { dispatch } = this.props;
-
-          try {
-            const success = await dispatch({
-              type: 'login/getCaptcha',
-              payload: values.mobile,
-            });
-            resolve(!!success);
-          } catch (error) {
-            reject(error);
-          }
+          dispatch({
+            type: 'userAndlogin/getCaptcha',
+            payload: values.mobile,
+          })
+            .then(resolve)
+            .catch(reject);
         }
       });
     });
@@ -81,8 +77,8 @@ class Login extends Component {
   );
 
   render() {
-    const { userLogin, submitting } = this.props;
-    const { status, type: loginType } = userLogin;
+    const { userAndlogin, submitting } = this.props;
+    const { status, type: loginType } = userAndlogin;
     const { type, autoLogin } = this.state;
     return (
       <div className={styles.main}>
@@ -90,14 +86,14 @@ class Login extends Component {
           defaultActiveKey={type}
           onTabChange={this.onTabChange}
           onSubmit={this.handleSubmit}
-          onCreate={form => {
+          ref={form => {
             this.loginForm = form;
           }}
         >
           <Tab
             key="account"
             tab={formatMessage({
-              id: 'user-login.login.tab-login-credentials',
+              id: 'userandlogin.login.tab-login-credentials',
             })}
           >
             {status === 'error' &&
@@ -105,19 +101,19 @@ class Login extends Component {
               !submitting &&
               this.renderMessage(
                 formatMessage({
-                  id: 'user-login.login.message-invalid-credentials',
+                  id: 'userandlogin.login.message-invalid-credentials',
                 }),
               )}
             <UserName
               name="userName"
               placeholder={`${formatMessage({
-                id: 'user-login.login.userName',
+                id: 'userandlogin.login.userName',
               })}: admin or user`}
               rules={[
                 {
                   required: true,
                   message: formatMessage({
-                    id: 'user-login.userName.required',
+                    id: 'userandlogin.userName.required',
                   }),
                 },
               ]}
@@ -125,29 +121,26 @@ class Login extends Component {
             <Password
               name="password"
               placeholder={`${formatMessage({
-                id: 'user-login.login.password',
+                id: 'userandlogin.login.password',
               })}: ant.design`}
               rules={[
                 {
                   required: true,
                   message: formatMessage({
-                    id: 'user-login.password.required',
+                    id: 'userandlogin.password.required',
                   }),
                 },
               ]}
               onPressEnter={e => {
                 e.preventDefault();
-
-                if (this.loginForm) {
-                  this.loginForm.validateFields(this.handleSubmit);
-                }
+                this.loginForm.validateFields(this.handleSubmit);
               }}
             />
           </Tab>
           <Tab
             key="mobile"
             tab={formatMessage({
-              id: 'user-login.login.tab-login-mobile',
+              id: 'userandlogin.login.tab-login-mobile',
             })}
           >
             {status === 'error' &&
@@ -155,25 +148,25 @@ class Login extends Component {
               !submitting &&
               this.renderMessage(
                 formatMessage({
-                  id: 'user-login.login.message-invalid-verification-code',
+                  id: 'userandlogin.login.message-invalid-verification-code',
                 }),
               )}
             <Mobile
               name="mobile"
               placeholder={formatMessage({
-                id: 'user-login.phone-number.placeholder',
+                id: 'userandlogin.phone-number.placeholder',
               })}
               rules={[
                 {
                   required: true,
                   message: formatMessage({
-                    id: 'user-login.phone-number.required',
+                    id: 'userandlogin.phone-number.required',
                   }),
                 },
                 {
                   pattern: /^1\d{10}$/,
                   message: formatMessage({
-                    id: 'user-login.phone-number.wrong-format',
+                    id: 'userandlogin.phone-number.wrong-format',
                   }),
                 },
               ]}
@@ -181,21 +174,21 @@ class Login extends Component {
             <Captcha
               name="captcha"
               placeholder={formatMessage({
-                id: 'user-login.verification-code.placeholder',
+                id: 'userandlogin.verification-code.placeholder',
               })}
               countDown={120}
               onGetCaptcha={this.onGetCaptcha}
               getCaptchaButtonText={formatMessage({
-                id: 'user-login.form.get-captcha',
+                id: 'userandlogin.form.get-captcha',
               })}
               getCaptchaSecondText={formatMessage({
-                id: 'user-login.captcha.second',
+                id: 'userandlogin.captcha.second',
               })}
               rules={[
                 {
                   required: true,
                   message: formatMessage({
-                    id: 'user-login.verification-code.required',
+                    id: 'userandlogin.verification-code.required',
                   }),
                 },
               ]}
@@ -203,7 +196,7 @@ class Login extends Component {
           </Tab>
           <div>
             <Checkbox checked={autoLogin} onChange={this.changeAutoLogin}>
-              <FormattedMessage id="user-login.login.remember-me" />
+              <FormattedMessage id="userandlogin.login.remember-me" />
             </Checkbox>
             <a
               style={{
@@ -211,19 +204,19 @@ class Login extends Component {
               }}
               href=""
             >
-              <FormattedMessage id="user-login.login.forgot-password" />
+              <FormattedMessage id="userandlogin.login.forgot-password" />
             </a>
           </div>
           <Submit loading={submitting}>
-            <FormattedMessage id="user-login.login.login" />
+            <FormattedMessage id="userandlogin.login.login" />
           </Submit>
           <div className={styles.other}>
-            <FormattedMessage id="user-login.login.sign-in-with" />
+            <FormattedMessage id="userandlogin.login.sign-in-with" />
             <Icon type="alipay-circle" className={styles.icon} theme="outlined" />
             <Icon type="taobao-circle" className={styles.icon} theme="outlined" />
             <Icon type="weibo-circle" className={styles.icon} theme="outlined" />
             <Link className={styles.register} to="/user/register">
-              <FormattedMessage id="user-login.login.signup" />
+              <FormattedMessage id="userandlogin.login.signup" />
             </Link>
           </div>
         </LoginComponents>

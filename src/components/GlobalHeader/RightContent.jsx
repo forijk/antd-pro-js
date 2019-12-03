@@ -6,6 +6,7 @@ import Avatar from './AvatarDropdown';
 import HeaderSearch from '../HeaderSearch';
 import SelectLang from '../SelectLang';
 import styles from './index.less';
+import NoticeIconView from './NoticeIconView';
 
 const GlobalHeaderRight = props => {
   const { theme, layout } = props;
@@ -55,7 +56,8 @@ const GlobalHeaderRight = props => {
           <Icon type="question-circle-o" />
         </a>
       </Tooltip>
-      <Avatar />
+      <NoticeIconView />
+      <Avatar menu />
       <SelectLang className={styles.action} />
     </div>
   );
